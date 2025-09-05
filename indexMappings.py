@@ -1,0 +1,32 @@
+indexMappings = {
+  "properties":{
+    "scheme_id":{
+      "type":"long"
+    },
+    "scheme_name":{
+      "type":"text",
+    },
+    "description":{
+      "type":"text",
+    },
+    "department":{
+      "type":"text",
+    },
+    "category":{
+      "type":"text",
+    },
+    "eligibility":{
+      "type":"text",
+    },
+    "deadline":{
+      "type":"date",
+    },
+    "description_vector":{
+      "type":"dense_vector",
+      "dims":768,
+      "index":True,
+      "similarity":"l2_norm"
+      # l2_norm is root sum sqaured
+    }
+  }
+}
