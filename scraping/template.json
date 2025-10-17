@@ -1,0 +1,57 @@
+{
+  "https://mahafood.gov.in/provider/%E0%A4%B0%E0%A4%BE%E0%A4%9C%E0%A5%8D%E0%A4%AF-%E0%A4%B8%E0%A4%B0%E0%A4%95%E0%A4%BE%E0%A4%B0-mr/": {
+    "base_url": "https://mahafood.gov.in/provider/%E0%A4%B0%E0%A4%BE%E0%A4%9C%E0%A5%8D%E0%A4%AF-%E0%A4%B8%E0%A4%B0%E0%A4%95%E0%A4%BE%E0%A4%B0-mr/",
+    "list_page": {
+      "scheme_container": ".eventContent",
+      "title": "h2 a",
+      "description": null,
+      "details_link": "a.btn.btn-theme.accent-color",
+      "next_page": "",
+      "language": "Marathi"
+    },
+    "detail_page": {
+      "description": [
+        "#row-content > div.award-details > div > div > p:nth-child(3) > font > font",
+        "#row-content > div.award-details > div > div > p.text-justify > font > font",
+        ".award-details p font font",
+        ".award-details p",
+        "p.text-justify",
+        "p"
+      ],
+      "eligibility": [
+        "p:contains('Eligibility')",
+        "p:contains('पात्रता')",
+        "li:contains('Eligibility')"
+      ],
+      "category": [
+        "p:contains('Category')",
+        "p:contains('श्रेणी')",
+        "li:contains('Category')"
+      ]
+    }
+  },
+  "https://maharashtra.gov.in/Site/1604/scheme": {
+    "base_url": "https://maharashtra.gov.in/Site/1604/scheme",
+    "list_page": {
+      "scheme_container": ".pannel.mt-3",
+      "title": "h3",
+      "description": "p",
+      "details_link": "p a",
+      "next_page": "",
+      "language": "Marathi"
+    },
+    "detail_page": {
+      "description": ["p", ".scheme-description", ".content p"],
+      "eligibility": [
+        "p:contains('पात्रता')",
+        "p:contains('Eligibility')",
+        "li:contains('Eligibility')"
+      ],
+      "category": [
+        "p:contains('श्रेणी')",
+        "p:contains('Category')",
+        "li:contains('Category')"
+      ]
+    }
+  }
+}
