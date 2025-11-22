@@ -86,7 +86,7 @@ async def main():
     with open("template.json", "r", encoding="utf-8") as f:
         templates = json.load(f)
 
-    with open("output.csv", "w", newline="", encoding="utf-8") as f:
+    with open("scrapedDataset.csv", "w", newline="", encoding="utf-8") as f:
         fieldnames = ["Site", "Title", "Description", "Eligibility", "Category", "OfficialLink"]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()

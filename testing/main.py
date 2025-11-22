@@ -2,7 +2,8 @@ import streamlit as st
 from elasticsearch import Elasticsearch
 from sentence_transformers import SentenceTransformer
 
-indexName = "marathi_schemes"
+
+indexName = "schemes_mapping"
 
 try:
     es = Elasticsearch(
@@ -34,7 +35,7 @@ def search(input_keyword):
         }
     }
 
-    result = es.search(index="marathi_schemes", body=query, source=["scheme_name", "description","deadline"])
+    result = es.search(index="schemes_mapping", body=query, source=["scheme_name", "description", "scheme_link"])
     result = result['hits']['hits']
 
     return result
@@ -65,9 +66,8 @@ def main():
                             st.write(f"वर्णन : {result['_source']['description']}")
                         except Exception as e:
                             print(e)
-
                         try:
-                            st.write(f"कालमर्यादा :  {result['_source']['deadline']}")
+                            st.write(f"link : {result['_source']['scheme_link']}")
                         except Exception as e:
                             print(e)
 

@@ -53,5 +53,103 @@
         "li:contains('Category')"
       ]
     }
+  },
+  "https://aaplesarkar.mahaonline.gov.in/": {
+  "base_url": "https://aaplesarkar.mahaonline.gov.in/",
+  "list_page": {
+    "scheme_container": "li.news-item",
+    "title": "h2.col-md-12.col-sm-12.col-xs-12",
+    "description": "div.row",
+    "details_link": "div.row div.col-md-6.col-sm-12.col-xs-12 > a",
+    "next_page": "",
+    "language": "Marathi"
+  },
+  "detail_page": {
+    "description": ["#content p", ".scheme-description p", "p"],
+    "eligibility": [
+      "p:contains('पात्रता')",
+      "p:contains('Eligibility')",
+      "li:contains('Eligibility')"
+    ],
+    "category": [
+      "p:contains('श्रेणी')",
+      "p:contains('Category')",
+      "li:contains('Category')"
+    ]
   }
+},
+"https://mahabhumi.gov.in/": {
+  "base_url": "https://mahabhumi.gov.in/",
+  "list_page": {
+    "scheme_container": "div.panel.panel-info",
+    "title": "div.panel-heading",
+    "description": "div.panel-body div.row div.form-group div.col-sm-12",
+    "details_link": "div.panel-body div.row div.form-group div.col-sm-12 a.btn.btn-3",
+    "next_page": "",
+    "language": "Marathi"
+  },
+  "detail_page": {
+    "description": ["div.content p", "p", "div.scheme-description p"],
+    "eligibility": [
+      "p:contains('[translate:पात्रता]')",
+      "p:contains('Eligibility')",
+      "li:contains('Eligibility')"
+    ],
+    "category": [
+      "p:contains('[translate:श्रेणी]')",
+      "p:contains('Category')",
+      "li:contains('Category')"
+    ]
+  }
+}
+,
+"https://www.india.gov.in/": {
+  "base_url": "https://www.india.gov.in/",
+  "list_page": {
+    "scheme_container": "ul.grid.grid-cols-3.lg\\:grid-cols-5 > li",
+    "title": "li > a > div > p.my-2.text-sm.md\\:text-xl.font-semibold",
+    "description": "li > a > div > p.text-var--very-dark-blue",
+    "details_link": "li > a",
+    "next_page": "",
+    "language": "English"
+  },
+  "detail_page": {
+    "description": ["div#content p", "p", ".scheme-description p"],
+    "eligibility": [
+      "p:contains('Eligibility')",
+      "li:contains('Eligibility')",
+      "div:contains('Eligibility')"
+    ],
+    "category": [
+      "p:contains('Category')",
+      "li:contains('Category')",
+      "div:contains('Category')"
+    ]
+  }
+}
+,
+"https://www.mcgm.gov.in/": {
+  "base_url": "https://www.mcgm.gov.in/",
+  "list_page": {
+    "scheme_container": "div.logo-carousel-sec div.container div.row > div.Illustrator-links",
+    "title": "div.Imp-Info h3",
+    "description": "",
+    "details_link": "a.BMC-white-box",
+    "next_page": "",
+    "language": "Marathi"
+  },
+  "detail_page": {
+    "description": ["div.content p", "p", ".scheme-description p"],
+    "eligibility": [
+      "p:contains('[translate:पात्रता]')",
+      "p:contains('Eligibility')",
+      "li:contains('Eligibility')"
+    ],
+    "category": [
+      "p:contains('[translate:श्रेणी]')",
+      "p:contains('Category')",
+      "li:contains('Category')"
+    ]
+  }
+}
 }

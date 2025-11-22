@@ -3,23 +3,17 @@ indexMappings = {
     "scheme_id":{
       "type":"long"
     },
+    "site": {
+      "type": "keyword"
+    },
     "scheme_name":{
       "type":"text",
     },
     "description":{
       "type":"text",
     },
-    "department":{
-      "type":"text",
-    },
-    "category":{
-      "type":"text",
-    },
-    "eligibility":{
-      "type":"text",
-    },
-    "deadline":{
-      "type":"date",
+    "scheme_link":{
+      "type": "keyword"
     },
     "description_vector":{
       "type":"dense_vector",
