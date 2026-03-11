@@ -1,8 +1,10 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
+import ast
 from elasticsearch import Elasticsearch
 from sentence_transformers import SentenceTransformer
+from LLMConnection import llm_explain
 
 st.set_page_config(page_title="Marathi Govt Scheme Search", page_icon="🔍", layout="wide")
 
@@ -38,7 +40,7 @@ model = load_model()
 
 def lexical_search(query_text):
     query = {
-        "size": 5,
+        "size": 10,
         "query": {
             "multi_match": {
                 "query": query_text,
@@ -47,7 +49,7 @@ def lexical_search(query_text):
             }
         }
     }
-    res = es.search(index=index_name, body=query, source=["scheme_name", "description", "scheme_link"])
+    res = es.search(index=index_name, body=query, source=["scheme_id","scheme_name", "description", "scheme_link"])
     return res.get("hits", {}).get("hits", [])
 
 
@@ -55,7 +57,7 @@ def semantic_search(query_text):
     vector = model.encode(query_text)
 
     query = {
-        "size": 5,
+        "size": 10,
         "knn": {
             "field": "description_vector",
             "query_vector": vector.tolist(),
@@ -64,7 +66,7 @@ def semantic_search(query_text):
         }
     }
 
-    res = es.search(index=index_name, body=query, source=["scheme_name", "description", "scheme_link"])
+    res = es.search(index=index_name, body=query, source=["scheme_id","scheme_name", "description", "scheme_link"])
     return res.get("hits", {}).get("hits", [])
 
 
@@ -72,23 +74,31 @@ def hybrid_search(query_text):
     vector = model.encode(query_text)
 
     query = {
-        "size": 5,
+        "size": 10,
         "query": {
-            "bool": {
-                "should": [
-                    {"multi_match": {"query": query_text, "fields": ["scheme_name^2", "description"]}},
-                    {"knn": {
-                        "field": "description_vector",
-                        "query_vector": vector.tolist(),
-                        "k": 5,
-                        "num_candidates": 20
-                    }}
-                ]
+            "script_score": {
+                "query": {
+                    "multi_match": {
+                        "query": query_text,
+                        "fields": ["scheme_name^2", "description"]
+                    }
+                },
+                "script": {
+                    "source": """
+                        double bm25 = _score;
+                        double cosine = cosineSimilarity(params.query_vector, 'description_vector');
+                        return 0.4 * bm25 + 0.6 * cosine;
+                    """,
+                    "params": {
+                        "query_vector": vector.tolist()
+                    }
+                }
             }
         }
     }
 
-    res = es.search(index=index_name, body=query, source=["scheme_name", "description", "scheme_link"])
+    res = es.search(index=index_name, body=query,
+                    source=["scheme_id","scheme_name","description","scheme_link"])
     return res.get("hits", {}).get("hits", [])
 
 
@@ -150,6 +160,11 @@ if mode == "Admin":
             # -----------------------------------------
             # VIEW 1 — SEARCH COMPARISON DASHBOARD
             # -----------------------------------------
+
+
+
+
+
             st.subheader("View 1 — Search Comparison")
             col1, col2, col3 = st.columns(3)
 
@@ -238,24 +253,18 @@ if mode == "Admin":
                 # print("avg_lex_score:", avg_lex_score)
 
 
-            # -----------------------------------------
-            # PLACEHOLDERS FOR NEXT VIEWS
-            # -----------------------------------------
-            # st.subheader("📈 View 3 — Performance Metrics (Coming Next)")
-            # st.subheader("🧪 View 4 — Error Analysis (Coming Next)")
-            # st.subheader("🌐 View 5 — Language Analysis (Coming Next)")
-
             
             # -----------------------------------------
             # VIEW 3 — PERFORMANCE METRICS DASHBOARD
             # -----------------------------------------
             st.subheader("View 3 — Performance Metrics Dashboard")
 
-            TEST_FILE = "../comparision/testSets/marathi.csv"  # Format: query,correct_scheme_id
+            TEST_FILE = "./marathi/testSet.csv"  # Format: query,correct_scheme_id
 
             # Load test dataset
             try:
                 test_df = pd.read_csv(TEST_FILE)
+                print("Test dataset loaded successfully.")
             except:
                 st.error("❌ test_set.csv not found. Upload file in project folder.")
                 test_df = None
@@ -277,28 +286,51 @@ if mode == "Admin":
 
             # --------- EXTRACT IDS FROM SEARCH RESULTS ---------
             def extract_scheme_ids(results):
-                return [r["_source"]["scheme_name"] for r in results]
+                return [r["_source"]["scheme_id"] for r in results]
 
 
             # --------- EVALUATION FUNCTION ---------
             def evaluate_system(df, search_function):
-                top1, top3, mrr, precision = [], [], [], []
+                top1, top3, top5, top10, mrr, precision = [], [], [], [],[], []
 
                 for _, row in df.iterrows():
                     query = row["query"]
-                    correct_id = row["relevant_scheme_ids"]
+
+                    # Convert string "[14,34,43]" → actual list
+                    correct_ids = ast.literal_eval(row["relevant_scheme_ids"])
+                    # print("\n\nCorrect IDs:", correct_ids)
 
                     results = search_function(query)
                     pred_ids = extract_scheme_ids(results)
+                    # print("\n\nPredicted IDs:", pred_ids)
 
-                    top1.append(top_k_accuracy(pred_ids, correct_id, 1))
-                    top3.append(top_k_accuracy(pred_ids, correct_id, 3))
-                    mrr.append(reciprocal_rank(pred_ids, correct_id))
-                    precision.append(precision_at_k(pred_ids, correct_id, 3))
+                    # Now check if ANY correct id is in top-k
+                    top1.append(any(cid in pred_ids[:1] for cid in correct_ids))
+                    top3.append(any(cid in pred_ids[:3] for cid in correct_ids))
+                    top5.append(any(cid in pred_ids[:5] for cid in correct_ids))
+                    top10.append(any(cid in pred_ids[:10] for cid in correct_ids))
 
+
+                    # MRR
+                    rr = 0
+                    for i, pid in enumerate(pred_ids):
+                        if pid in correct_ids:
+                            rr = 1 / (i + 1)
+                            break
+                    mrr.append(rr)
+
+                    precision.append(
+                        sum(1 for pid in pred_ids[:3] if pid in correct_ids) / 3
+                    )
+
+
+                # print("Top-1 Accuracy:", np.mean(top1))
+                # print("Top-3 Accuracy:", np.mean(top3))
                 return {
                     "Top-1 Accuracy": np.mean(top1),
                     "Top-3 Accuracy": np.mean(top3),
+                    "Top-5 Accuracy": np.mean(top5),
+                    "Top-10 Accuracy": np.mean(top10),
                     "MRR": np.mean(mrr),
                     "Precision@3": np.mean(precision)
                 }
@@ -319,9 +351,26 @@ if mode == "Admin":
                     {"Search Type": "Hybrid", **hybrid_metrics}
                 ])
 
+                print("\n\nEvaluation Results:\n", results_df)
                 st.dataframe(results_df, use_container_width=True)
 
                 # --------- BEST MODEL ---------
                 best = results_df.sort_values("Top-1 Accuracy", ascending=False).iloc[0]["Search Type"]
                 st.success(f"Best Performing Method: {best}")
+
+
+
+
+
                     
+            st.subheader("LLM-based Explanation")
+
+            with st.spinner("LLM generating explanations..."):
+                explanation = llm_explain(
+                    admin_query,
+                    hyb_results,
+                    "Hybrid"
+                )
+
+            st.markdown("### Output")
+            st.markdown(explanation)
