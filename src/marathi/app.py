@@ -10,6 +10,7 @@ from searchFunctions.hybridSearch import hybrid_search
 from adminViews.searchComparison import render_results
 from adminViews.scoreBreakdown import render_score_breakdown
 from adminViews.llmView import render_llm
+from adminViews.comparisionGraph import render_comparison_graph
 
 st.set_page_config(
     page_title="Marathi Govt Scheme Search",
@@ -32,7 +33,16 @@ if mode == "User":
 
     if st.button("Search"):
 
-        results = hybrid_search(es, INDEX_NAME, query, model)
+        hyb_results = hybrid_search(es, INDEX_NAME, query, model)
+        
+        results = hyb_results
+        if not hyb_results:
+            sem_results = semantic_search(es, INDEX_NAME, query, model)
+            results = sem_results
+        else:
+            lex_results = lexical_search(es, INDEX_NAME, query)
+            results = lex_results 
+
 
         for r in results:
 
@@ -40,11 +50,11 @@ if mode == "User":
 
             st.subheader(src["scheme_name"])
 
-            with st.expander("Description"):
+            with st.expander("अधिक माहिती"):
                 st.write(src["description"])
 
             st.markdown(
-                f"[More Info]({src['scheme_link']})"
+                f"[Link]({src['scheme_link']})"
             )
 
 # ADMIN PANEL
@@ -59,10 +69,11 @@ if mode == "Admin":
         sem = semantic_search(es, INDEX_NAME, query, model)
         hyb = hybrid_search(es, INDEX_NAME, query, model)
 
-        tab1, tab2, tab3, tab4 = st.tabs([
+        tab1, tab2, tab3, tab4, tab5 = st.tabs([
             "Search Comparison",
             "Score Breakdown",
             "Metrics Dashboard",
+            "Comparison Graph",
             "LLM Explanation"
         ])
 
@@ -85,9 +96,14 @@ if mode == "Admin":
             sem_score = sem[0]["_score"] if sem else 0
 
             render_score_breakdown(lex_score, sem_score)
-        with tab3:
-            render_metrics_dashboard(es, INDEX_NAME, model)
-    
-        with tab4:
+            
+        results_df = None
 
+        with tab3:
+            results_df = render_metrics_dashboard(es, INDEX_NAME, model)
+        
+        with tab4:
+            render_comparison_graph(results_df)
+    
+        with tab5:
             render_llm(query, hyb)

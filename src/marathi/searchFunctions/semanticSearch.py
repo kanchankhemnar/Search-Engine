@@ -7,8 +7,8 @@ def semantic_search(es, index_name, query_text, model):
         "knn": {
             "field": "description_vector",
             "query_vector": vector.tolist(),
-            "k": 5,
-            "num_candidates": 20
+            "k": 10,
+            "num_candidates": 100
         }
     }
 

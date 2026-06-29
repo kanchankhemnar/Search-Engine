@@ -59,3 +59,4 @@ def render_metrics_dashboard(es, index_name, model):
     ).iloc[0]["Search Type"]
 
     st.success(f"Best Performing Method: {best}")
+    return results_df  
